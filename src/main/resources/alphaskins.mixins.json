@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.mja00.alphaskins.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "alphaskins.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "MixinDownloadingTexture",
+    "MixinSkinProcessor",
+    "MixinPlayerRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
