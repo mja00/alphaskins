@@ -1,12 +1,12 @@
 package dev.mja00.alphaskins.mixin;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.PlayerRenderer;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public class MixinPlayerRenderer {
 
     @Shadow
-    private void setModelVisibilities(AbstractClientPlayerEntity clientPlayer) {
+    private void setModelProperties(AbstractClientPlayer clientPlayer) {
 
     }
 
@@ -25,19 +25,19 @@ public class MixinPlayerRenderer {
      * @reason Fixes first person rendering of transparent skins
      */
     @Overwrite
-    private void renderItem(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, AbstractClientPlayerEntity playerIn, ModelRenderer rendererArmIn, ModelRenderer rendererArmwearIn) {
+    private void renderHand(PoseStack p_117776_, MultiBufferSource p_117777_, int p_117778_, AbstractClientPlayer p_117779_, ModelPart p_117780_, ModelPart p_117781_) {
 
         PlayerRenderer render = (PlayerRenderer) (Object) this;
 
-        PlayerModel<AbstractClientPlayerEntity> playermodel = render.getEntityModel();
-        this.setModelVisibilities(playerIn);
-        playermodel.swingProgress = 0.0F;
-        playermodel.isSneak = false;
-        playermodel.swimAnimation = 0.0F;
-        playermodel.setRotationAngles(playerIn, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        rendererArmIn.rotateAngleX = 0.0F;
-        rendererArmIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.getEntityTranslucent(playerIn.getLocationSkin())), combinedLightIn, OverlayTexture.NO_OVERLAY);
-        rendererArmwearIn.rotateAngleX = 0.0F;
-        rendererArmwearIn.render(matrixStackIn, bufferIn.getBuffer(RenderType.getEntityTranslucent(playerIn.getLocationSkin())), combinedLightIn, OverlayTexture.NO_OVERLAY);
+        PlayerModel<AbstractClientPlayer> playermodel = render.getModel();
+        this.setModelProperties(p_117779_);
+        playermodel.attackTime = 0.0F;
+        playermodel.crouching = false;
+        playermodel.swimAmount = 0.0F;
+        playermodel.setupAnim(p_117779_, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        p_117780_.xRot = 0.0F;
+        p_117780_.render(p_117776_, p_117777_.getBuffer(RenderType.entityTranslucent(p_117779_.getSkinTextureLocation())), p_117778_, OverlayTexture.NO_OVERLAY);
+        p_117781_.xRot = 0.0F;
+        p_117781_.render(p_117776_, p_117777_.getBuffer(RenderType.entityTranslucent(p_117779_.getSkinTextureLocation())), p_117778_, OverlayTexture.NO_OVERLAY);
     }
 }

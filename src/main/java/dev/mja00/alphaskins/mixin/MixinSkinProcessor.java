@@ -1,7 +1,7 @@
 package dev.mja00.alphaskins.mixin;
 
 import com.mojang.realmsclient.util.SkinProcessor;
-import net.minecraft.client.renderer.texture.NativeImage;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SkinProcessor.class)
 public class MixinSkinProcessor {
 
-    private static final String STRIP_ALPHA = "Lcom/mojang/realmsclient/util/SkinProcessor;func_225229_b(IIII)V";
-    private static final String STRIP_COLOR = "Lcom/mojang/realmsclient/util/SkinProcessor;func_225227_a(IIII)V";
+    private static final String STRIP_ALPHA = "Lcom/mojang/realmsclient/util/SkinProcessor;setNoAlpha(IIII)V";
+    private static final String STRIP_COLOR = "Lcom/mojang/realmsclient/util/SkinProcessor;doLegacyTransparencyHack(IIII)V";
 
 
     @Inject(method = STRIP_ALPHA, at = @At("HEAD"), cancellable = true)
