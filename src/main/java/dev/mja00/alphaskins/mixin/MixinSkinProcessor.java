@@ -2,7 +2,6 @@ package dev.mja00.alphaskins.mixin;
 
 import com.mojang.realmsclient.util.SkinProcessor;
 import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.renderer.texture.SimpleTexture;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
