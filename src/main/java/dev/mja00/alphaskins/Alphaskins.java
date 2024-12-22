@@ -1,7 +1,7 @@
 package dev.mja00.alphaskins;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,8 +14,6 @@ public class Alphaskins {
 
 
     public Alphaskins() {
-        // Register ourselves for server and other game events we are interested in
-        MinecraftForge.EVENT_BUS.register(this);
         LOGGER.info("Hello from Alphaskins!");
     }
 }

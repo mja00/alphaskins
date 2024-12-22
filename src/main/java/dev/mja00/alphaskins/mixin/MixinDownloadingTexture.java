@@ -13,16 +13,12 @@ public abstract class MixinDownloadingTexture extends SimpleTexture {
 
     private MixinDownloadingTexture() {super(null);}
 
-    private static final String STRIP_ALPHA = "Lnet/minecraft/client/renderer/texture/HttpTexture;setNoAlpha(Lcom/mojang/blaze3d/platform/NativeImage;IIII)V";
-    private static final String STRIP_COLOR = "Lnet/minecraft/client/renderer/texture/HttpTexture;doNotchTransparencyHack(Lcom/mojang/blaze3d/platform/NativeImage;IIII)V";
-
-
-    @Inject(method = STRIP_ALPHA, at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setNoAlpha(Lcom/mojang/blaze3d/platform/NativeImage;IIII)V", at = @At("HEAD"), cancellable = true)
     private static void cancelAlphaStrip(NativeImage image, int beginX, int beginY, int endX, int endY, CallbackInfo info) {
         info.cancel();
     }
 
-    @Inject(method = STRIP_COLOR, at = @At("HEAD"), cancellable = true)
+    @Inject(method = "doNotchTransparencyHack(Lcom/mojang/blaze3d/platform/NativeImage;IIII)V", at = @At("HEAD"), cancellable = true)
     private static void cancelColorStrip(NativeImage image, int beginX, int beginY, int endX, int endY, CallbackInfo info) {
         info.cancel();
     }
