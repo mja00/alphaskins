@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "alphaskins",
+  "version": "${version}",
+  "name": "alphaskins",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "LGPL-3.0",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.mja00.alphaskins.client.AlphaskinsClient"
+    ],
+    "main": [
+      "dev.mja00.alphaskins.Alphaskins"
+    ]
+  },
+  "mixins": [
+    "alphaskins.mixins.json",
+    {
+      "config": "alphaskins.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": ">=1.20 <1.21"
+  }
+}
