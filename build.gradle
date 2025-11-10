@@ -5,15 +5,10 @@ plugins {
     id 'maven-publish'
     id 'dev.architectury.loom' version '1.7-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
-    id 'dev.kikugie.stonecutter' version '0.5.3'
-}
-
-stonecutter {
-    // This will be populated by the settings.gradle configuration
 }
 
 architectury {
-    minecraft = stonecutter.current.project.version
+    minecraft = stonecutter.current.version
 }
 
 subprojects {
@@ -42,7 +37,7 @@ subprojects {
     }
 
     dependencies {
-        minecraft "com.mojang:minecraft:${stonecutter.current.project.version}"
+        minecraft "com.mojang:minecraft:${stonecutter.current.version}"
         mappings loom.officialMojangMappings()
     }
 

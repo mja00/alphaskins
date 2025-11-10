@@ -24,7 +24,7 @@ dependencies {
 
 processResources {
     inputs.property 'version', project.version
-    inputs.property 'minecraft_version', stonecutter.current.project.version
+    inputs.property 'minecraft_version', stonecutter.current.version
     inputs.property 'neo_version', '21.4.38-beta'
     inputs.property 'neo_version_range', '[21.4,)'
     inputs.property 'mod_id', rootProject.mod_id
@@ -37,7 +37,7 @@ processResources {
     filesMatching('META-INF/neoforge.mods.toml') {
         expand(
                 'version': project.version,
-                'minecraft_version': stonecutter.current.project.version,
+                'minecraft_version': stonecutter.current.version,
                 'minecraft_version_range': '[1.21.4,1.22)',
                 'neo_version': '21.4.38-beta',
                 'neo_version_range': '[21.4,)',

@@ -25,7 +25,7 @@ dependencies {
 
 processResources {
     inputs.property 'version', project.version
-    inputs.property 'minecraft_version', stonecutter.current.project.version
+    inputs.property 'minecraft_version', stonecutter.current.version
     inputs.property 'mod_id', rootProject.mod_id
     inputs.property 'mod_name', rootProject.mod_name
     inputs.property 'mod_description', rootProject.mod_description
@@ -36,7 +36,7 @@ processResources {
     filesMatching('fabric.mod.json') {
         expand(
                 'version': project.version,
-                'minecraft_version': stonecutter.current.project.version,
+                'minecraft_version': stonecutter.current.version,
                 'mod_id': rootProject.mod_id,
                 'mod_name': rootProject.mod_name,
                 'mod_description': rootProject.mod_description,
