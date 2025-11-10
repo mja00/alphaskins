@@ -1,8 +1,19 @@
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
+
+plugins {
+    id("dev.architectury.loom")
+    id("architectury-plugin")
+}
+
+extensions.configure<com.github.jengelman.gradle.plugins.shadow.ShadowExtension> {
+    // Architectury configuration
+}
+
 architectury {
     common("fabric", "neoforge")
 }
 
-extensions.configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
+extensions.configure<LoomGradleExtensionAPI> {
     accessWidenerPath.set(file("src/main/resources/alphaskins.accesswidener"))
 }
 

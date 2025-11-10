@@ -1,9 +1,17 @@
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
+
+plugins {
+    id("dev.architectury.loom")
+    id("architectury-plugin")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+}
+
 architectury {
     platformSetupLoomIde()
     fabric()
 }
 
-extensions.configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
+extensions.configure<LoomGradleExtensionAPI> {
     accessWidenerPath.set(project(":common").file("src/main/resources/alphaskins.accesswidener"))
 }
 
