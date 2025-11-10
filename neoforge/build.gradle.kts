@@ -1,11 +1,9 @@
-import net.fabricmc.loom.api.LoomGradleExtensionAPI
-
 architectury {
     platformSetupLoomIde()
     neoForge()
 }
 
-extensions.configure<LoomGradleExtensionAPI> {
+loom {
     accessWidenerPath.set(project(":common").file("src/main/resources/alphaskins.accesswidener"))
 }
 
@@ -20,7 +18,7 @@ configurations {
 }
 
 dependencies {
-    "neoForge"("net.neoforged:neoforge:21.4.38-beta")
+    neoForge("net.neoforged:neoforge:21.4.38-beta")
 
     common(project(":common", "namedElements")) { isTransitive = false }
     shadowCommon(project(":common", "transformProductionNeoForge")) { isTransitive = false }

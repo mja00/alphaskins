@@ -1,11 +1,9 @@
-import net.fabricmc.loom.api.LoomGradleExtensionAPI
-
 architectury {
     platformSetupLoomIde()
     fabric()
 }
 
-extensions.configure<LoomGradleExtensionAPI> {
+loom {
     accessWidenerPath.set(project(":common").file("src/main/resources/alphaskins.accesswidener"))
 }
 
@@ -20,8 +18,8 @@ configurations {
 }
 
 dependencies {
-    "modImplementation"("net.fabricmc:fabric-loader:0.16.9")
-    "modApi"("net.fabricmc.fabric-api:fabric-api:0.110.0+1.21.4")
+    modImplementation("net.fabricmc:fabric-loader:0.16.9")
+    modApi("net.fabricmc.fabric-api:fabric-api:0.110.0+1.21.4")
 
     common(project(":common", "namedElements")) { isTransitive = false }
     shadowCommon(project(":common", "transformProductionFabric")) { isTransitive = false }
