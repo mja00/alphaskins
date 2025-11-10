@@ -1,0 +1,77 @@
+architectury {
+    platformSetupLoomIde()
+    neoForge()
+}
+
+loom {
+    accessWidenerPath = project(':common').loom.accessWidenerPath
+}
+
+configurations {
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentNeoForge.extendsFrom common
+}
+
+dependencies {
+    neoForge "net.neoforged:neoforge:21.4.38-beta"
+
+    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
+    shadowCommon(project(path: ':common', configuration: 'transformProductionNeoForge')) { transitive = false }
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft_version', stonecutter.current.project.version
+    inputs.property 'neo_version', '21.4.38-beta'
+    inputs.property 'neo_version_range', '[21.4,)'
+    inputs.property 'mod_id', rootProject.mod_id
+    inputs.property 'mod_name', rootProject.mod_name
+    inputs.property 'mod_description', rootProject.mod_description
+    inputs.property 'mod_version', rootProject.mod_version
+    inputs.property 'mod_authors', rootProject.mod_authors
+    inputs.property 'mod_license', rootProject.mod_license
+
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand(
+                'version': project.version,
+                'minecraft_version': stonecutter.current.project.version,
+                'minecraft_version_range': '[1.21.4,1.22)',
+                'neo_version': '21.4.38-beta',
+                'neo_version_range': '[21.4,)',
+                'loader_version_range': '[2,)',
+                'mod_id': rootProject.mod_id,
+                'mod_name': rootProject.mod_name,
+                'mod_description': rootProject.mod_description,
+                'mod_version': rootProject.mod_version,
+                'mod_authors': rootProject.mod_authors,
+                'mod_license': rootProject.mod_license
+        )
+    }
+}
+
+shadowJar {
+    exclude 'architectury.common.json'
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = 'dev-shadow'
+}
+
+remapJar {
+    injectAccessWidener = true
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+}
+
+sourcesJar {
+    def commonSources = project(':common').sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
