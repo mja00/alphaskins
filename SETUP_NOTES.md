@@ -13,18 +13,20 @@
 - Required: `kotlinController = false` for Groovy scripts
 
 ### Configuration Syntax
-**settings.gradle (Groovy):**
-```groovy
+**settings.gradle.kts (Kotlin DSL):**
+```kotlin
 stonecutter {
-    kotlinController = false
-    centralScript = "build.gradle"
+    kotlinController = true
+    centralScript = "build.gradle.kts"
 
-    create(getRootProject()) {
-        versions "1.20.1", "1.21.1", "1.21.4"
+    create(rootProject) {
+        versions("1.20.1", "1.21.1", "1.21.4")
         vcsVersion = "1.21.4"
     }
 }
 ```
+
+**Note**: Migrated from Groovy to Kotlin DSL for better Stonecutter 0.7 support and IDE integration.
 
 ## Architecture Decision
 

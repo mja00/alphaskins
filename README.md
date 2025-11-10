@@ -31,6 +31,8 @@ alphaskins/
 
 ## Building
 
+**Note**: This project uses Kotlin DSL (`.gradle.kts`) for all build files, providing better Stonecutter support and IDE integration.
+
 ### Build all versions and loaders
 ```bash
 ./gradlew build
