@@ -3,13 +3,13 @@ architectury {
     neoForge()
 }
 
-configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
+extensions.configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
     accessWidenerPath.set(project(":common").file("src/main/resources/alphaskins.accesswidener"))
 }
 
 val common: Configuration by configurations.creating
 val shadowCommon: Configuration by configurations.creating
-val developmentNeoForge: Configuration by configurations.getting
+val developmentNeoForge: Configuration = configurations.getByName("developmentNeoForge")
 
 configurations {
     compileClasspath.get().extendsFrom(common)
@@ -18,7 +18,7 @@ configurations {
 }
 
 dependencies {
-    neoForge("net.neoforged:neoforge:21.4.38-beta")
+    "neoForge"("net.neoforged:neoforge:21.4.38-beta")
 
     common(project(":common", "namedElements")) { isTransitive = false }
     shadowCommon(project(":common", "transformProductionNeoForge")) { isTransitive = false }

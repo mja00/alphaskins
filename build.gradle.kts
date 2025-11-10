@@ -11,6 +11,7 @@ architectury {
 
 subprojects {
     apply(plugin = "java")
+    apply(plugin = "architectury-plugin")
     apply(plugin = "dev.architectury.loom")
     apply(plugin = "maven-publish")
 
@@ -29,13 +30,13 @@ subprojects {
         maven("https://maven.architectury.dev/")
     }
 
-    configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
+    extensions.configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
         silentMojangMappingsLicense()
     }
 
     dependencies {
         "minecraft"("com.mojang:minecraft:${stonecutter.current.version}")
-        "mappings"(the<net.fabricmc.loom.api.LoomGradleExtensionAPI>().officialMojangMappings())
+        "mappings"(extensions.getByType<net.fabricmc.loom.api.LoomGradleExtensionAPI>().officialMojangMappings())
     }
 
     java {

@@ -3,13 +3,13 @@ architectury {
     fabric()
 }
 
-configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
+extensions.configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
     accessWidenerPath.set(project(":common").file("src/main/resources/alphaskins.accesswidener"))
 }
 
 val common: Configuration by configurations.creating
 val shadowCommon: Configuration by configurations.creating
-val developmentFabric: Configuration by configurations.getting
+val developmentFabric: Configuration = configurations.getByName("developmentFabric")
 
 configurations {
     compileClasspath.get().extendsFrom(common)
@@ -18,8 +18,8 @@ configurations {
 }
 
 dependencies {
-    modImplementation("net.fabricmc:fabric-loader:0.16.9")
-    modApi("net.fabricmc.fabric-api:fabric-api:0.110.0+1.21.4")
+    "modImplementation"("net.fabricmc:fabric-loader:0.16.9")
+    "modApi"("net.fabricmc.fabric-api:fabric-api:0.110.0+1.21.4")
 
     common(project(":common", "namedElements")) { isTransitive = false }
     shadowCommon(project(":common", "transformProductionFabric")) { isTransitive = false }
