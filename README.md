@@ -87,7 +87,7 @@ import net.minecraft.client.renderer.texture.SkinTextureDownloader;
 - Java 21
 - Architectury Loom 1.7-SNAPSHOT
 - Architectury Plugin 3.4-SNAPSHOT
-- Stonecutter 0.5.3
+- Stonecutter 0.7.10
 
 ## License
 
