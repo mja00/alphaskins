@@ -1,14 +1,5 @@
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
-plugins {
-    id("dev.architectury.loom")
-    id("architectury-plugin")
-}
-
-extensions.configure<com.github.jengelman.gradle.plugins.shadow.ShadowExtension> {
-    // Architectury configuration
-}
-
 architectury {
     common("fabric", "neoforge")
 }

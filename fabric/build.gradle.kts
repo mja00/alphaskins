@@ -1,11 +1,5 @@
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
-plugins {
-    id("dev.architectury.loom")
-    id("architectury-plugin")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-}
-
 architectury {
     platformSetupLoomIde()
     fabric()
