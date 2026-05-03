@@ -34,7 +34,6 @@ sourceSets["main"].apply {
 
 loom {
     silentMojangMappingsLicense()
-    accessWidenerPath.set(branchRoot.resolve("src/main/resources/alphaskins.accesswidener"))
 }
 
 dependencies {

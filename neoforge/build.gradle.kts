@@ -1,9 +1,20 @@
-plugins {
-    java
-    id("dev.architectury.loom")
-}
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
 val minecraftVersion: String = stonecutter.current.version
+val isUnobfuscated = stonecutter.eval(minecraftVersion, ">=26.1")
+
+plugins {
+    java
+    // 26.1+ is unobfuscated; needs the no-remap variant. Older versions need the
+    // standard plugin so it can apply official Mojang mappings. Both expose a
+    // 'loom' extension of type LoomGradleExtensionAPI, so the rest of the script
+    // works identically either way.
+    id("dev.architectury.loom") apply false
+    id("dev.architectury.loom-no-remap") apply false
+}
+
+apply(plugin = if (isUnobfuscated) "dev.architectury.loom-no-remap" else "dev.architectury.loom")
+
 val branchRoot = projectDir.resolve("../..")
 
 version = "${mod.version}+$minecraftVersion-neoforge"
@@ -15,7 +26,7 @@ repositories {
     maven("https://maven.architectury.dev/")
 }
 
-val javaVersion = if (stonecutter.eval(minecraftVersion, ">=26.1")) JavaVersion.VERSION_25
+val javaVersion = if (isUnobfuscated) JavaVersion.VERSION_25
     else if (stonecutter.eval(minecraftVersion, ">=1.20.5")) JavaVersion.VERSION_21
     else JavaVersion.VERSION_17
 
@@ -31,14 +42,15 @@ sourceSets["main"].apply {
     resources.setSrcDirs(listOf(branchRoot.resolve("src/main/resources")))
 }
 
-loom {
-    silentMojangMappingsLicense()
-    accessWidenerPath.set(branchRoot.resolve("src/main/resources/alphaskins.accesswidener"))
-}
+val loom = extensions.getByName<LoomGradleExtensionAPI>("loom")
+
+loom.silentMojangMappingsLicense()
 
 dependencies {
-    minecraft("com.mojang:minecraft:$minecraftVersion")
-    mappings(loom.officialMojangMappings())
+    "minecraft"("com.mojang:minecraft:$minecraftVersion")
+    if (!isUnobfuscated) {
+        "mappings"(loom.officialMojangMappings())
+    }
     "neoForge"("net.neoforged:neoforge:${mod.dep("neoforge")}")
 }
 
