@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build ${{ matrix.loader }} ${{ matrix.mc }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: [fabric, neoforge]
+        mc: ['1.21.4', '1.21.8', '1.21.11', '26.1.2']
+        include:
+          - mc: '1.21.4'
+            java: '21'
+          - mc: '1.21.8'
+            java: '21'
+          - mc: '1.21.11'
+            java: '21'
+          - mc: '26.1.2'
+            java: '25'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+
+      # --configure-on-demand keeps each job from configuring the seven sibling
+      # Stonecutter variants. Without it, every job pays Loom's setup cost
+      # (download MC, decompile, etc.) for all 8 (loader, mc) projects, even
+      # though it only builds one. With it, only the target project configures,
+      # which also means each job only needs its own JDK.
+      - name: Build ${{ matrix.loader }}:${{ matrix.mc }}
+        run: ./gradlew :${{ matrix.loader }}:${{ matrix.mc }}:build --configure-on-demand --stacktrace
+
+      - name: Upload jars
+        uses: actions/upload-artifact@v7
+        with:
+          name: alphaskins-${{ matrix.loader }}-${{ matrix.mc }}
+          path: |
+            ${{ matrix.loader }}/versions/${{ matrix.mc }}/build/libs/*.jar
+            !${{ matrix.loader }}/versions/${{ matrix.mc }}/build/libs/*-sources.jar
+            !${{ matrix.loader }}/versions/${{ matrix.mc }}/build/libs/*-dev.jar
+            !${{ matrix.loader }}/versions/${{ matrix.mc }}/build/libs/*-dev-shadow.jar
+          if-no-files-found: error

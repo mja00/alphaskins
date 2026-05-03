@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to release (e.g. v5.0.0)
+        required: true
+
+permissions:
+  contents: write
+
+# A release in flight should not be cancelled by a re-run of the same tag.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build ${{ matrix.loader }} ${{ matrix.mc }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: [fabric, neoforge]
+        mc: ['1.21.4', '1.21.8', '1.21.11', '26.1.2']
+        include:
+          - mc: '1.21.4'
+            java: '21'
+          - mc: '1.21.8'
+            java: '21'
+          - mc: '1.21.11'
+            java: '21'
+          - mc: '26.1.2'
+            java: '25'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+
+      - name: Build ${{ matrix.loader }}:${{ matrix.mc }}
+        run: ./gradlew :${{ matrix.loader }}:${{ matrix.mc }}:build --configure-on-demand --stacktrace
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: jar-${{ matrix.loader }}-${{ matrix.mc }}
+          path: |
+            ${{ matrix.loader }}/versions/${{ matrix.mc }}/build/libs/*.jar
+            !${{ matrix.loader }}/versions/${{ matrix.mc }}/build/libs/*-sources.jar
+            !${{ matrix.loader }}/versions/${{ matrix.mc }}/build/libs/*-dev.jar
+            !${{ matrix.loader }}/versions/${{ matrix.mc }}/build/libs/*-dev-shadow.jar
+          if-no-files-found: error
+
+  github-release:
+    name: gh draft release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all jars
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: jar-*
+          merge-multiple: true
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: ${{ inputs.tag || github.ref_name }}
+          files: dist/*.jar
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+
+  publish:
+    name: publish ${{ matrix.loader }} ${{ matrix.mc }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: [fabric, neoforge]
+        mc: ['1.21.4', '1.21.8', '1.21.11', '26.1.2']
+    steps:
+      - name: Download jar
+        uses: actions/download-artifact@v8
+        with:
+          name: jar-${{ matrix.loader }}-${{ matrix.mc }}
+          path: dist
+
+      - name: Compute version string
+        id: ver
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          MOD_VERSION="${TAG#v}"
+          echo "mod=${MOD_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "platform=${MOD_VERSION}+${{ matrix.mc }}-${{ matrix.loader }}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to Modrinth & CurseForge
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ vars.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          curseforge-id: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          files: dist/*.jar
+          name: Alphaskins ${{ steps.ver.outputs.mod }} (${{ matrix.loader }} ${{ matrix.mc }})
+          version: ${{ steps.ver.outputs.platform }}
+          version-type: release
+          loaders: ${{ matrix.loader }}
+          game-versions: ${{ matrix.mc }}
+          retry-attempts: 2
+          fail-mode: fail
