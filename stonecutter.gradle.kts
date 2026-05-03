@@ -12,6 +12,8 @@ allprojects {
 
 // Aggregate all built mod jars into build/dist/ for easy upload.
 // Skips -sources, -dev, and -dev-shadow classifiers.
+// Stonecutter 0.7+ generates per-leaf preprocessed sources, so a leaf's
+// plain `build` produces the correct per-version jar — no chiseled task needed.
 tasks.register<Copy>("collectJars") {
     group = "distribution"
     description = "Copies every (loader, mc) jar into build/dist/"

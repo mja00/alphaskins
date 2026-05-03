@@ -72,6 +72,7 @@ tasks.processResources {
         "mod_authors" to mod.author,
         "mod_license" to mod.license,
         "minecraft_version" to minecraftVersion,
+        "java_version" to javaVersion.majorVersion,
     )
     for ((k, v) in tokens) inputs.property(k, v)
     filesMatching("fabric.mod.json") { expand(tokens) }
