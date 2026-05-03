@@ -41,6 +41,13 @@ Active version is set in `stonecutter.gradle.kts`. Build a single target:
 
 Output jars land in `<loader>/versions/<mc>/build/libs/`.
 
+To build everything and stage the upload-ready jars in one place:
+
+```sh
+./gradlew collectJars
+# → build/dist/alphaskins-{fabric,neoforge}-<mod>+<mc>-<loader>.jar
+```
+
 ## Tooling
 
 - Gradle 9.5
