@@ -1,29 +1,32 @@
 pluginManagement {
     repositories {
-        mavenLocal()
+        mavenCentral()
         gradlePluginPortal()
-        maven("https://maven.neoforged.net/releases")
         maven("https://maven.fabricmc.net/")
         maven("https://maven.architectury.dev/")
+        maven("https://maven.neoforged.net/releases/")
+        maven("https://maven.kikugie.dev/releases")
+        maven("https://maven.kikugie.dev/snapshots")
     }
 }
 
 plugins {
-    id("dev.kikugie.stonecutter") version "0.7.10"
+    id("dev.kikugie.stonecutter") version "0.7.+"
 }
 
 stonecutter {
-    kotlinController = true
     centralScript = "build.gradle.kts"
+    kotlinController = true
 
     create(rootProject) {
-        versions("1.20.1", "1.21.1", "1.21.4")
-        vcsVersion = "1.21.4"
+        // No common branch — each loader compiles its own copy of the mixins.
+        branch("fabric") {
+            versions("1.21.4")
+        }
+        branch("neoforge") {
+            versions("1.21.4")
+        }
     }
 }
 
 rootProject.name = "alphaskins"
-
-include("common")
-include("fabric")
-include("neoforge")

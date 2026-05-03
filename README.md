@@ -2,99 +2,52 @@
 
 Enable transparency in Minecraft player skins.
 
-## Monorepo Structure
+By default, Minecraft strips the alpha channel from player skin textures. This
+mod cancels the strip so transparent pixels render as transparent on both the
+player model and the held-hand view.
 
-This project uses **Architectury** for multi-loader support and **Stonecutter** for multi-version support, allowing all Minecraft versions and mod loaders to be developed in a single repository.
+## Repo layout
+
+Multi-loader, multi-version monorepo using
+[Stonecutter](https://github.com/stonecutter-versioning/stonecutter) for
+per-Minecraft-version preprocessing.
 
 ```
 alphaskins/
-├── common/              # Shared code across all loaders
-│   └── src/main/
-│       ├── java/       # Common mixins and logic
-│       └── resources/  # Mixin configurations
-├── fabric/             # Fabric-specific implementation
-│   └── src/main/
-│       ├── java/       # Fabric entry point
-│       └── resources/  # fabric.mod.json
-├── neoforge/           # NeoForge-specific implementation
-│   └── src/main/
-│       ├── java/       # NeoForge entry point
-│       └── resources/  # neoforge.mods.toml
-├── build.gradle        # Root build configuration
-└── settings.gradle     # Multi-version configuration
+├── fabric/                       # Fabric loader
+│   ├── build.gradle.kts          # Loom + Fabric deps
+│   ├── gradle.properties         # loom.platform=fabric
+│   ├── src/main/                 # Fabric entrypoint, mixins, fabric.mod.json
+│   └── versions/<mc>/            # Per-MC dep pins (fabric_loader, fabric_api)
+└── neoforge/                     # NeoForge loader
+    ├── build.gradle.kts          # Loom + NeoForge deps
+    ├── gradle.properties         # loom.platform=neoforge
+    ├── src/main/                 # NeoForge entrypoint, mixins, neoforge.mods.toml
+    └── versions/<mc>/            # Per-MC dep pins (neoforge, version ranges)
 ```
 
-## Supported Versions
-
-- **Minecraft**: 1.20.1, 1.21.1, 1.21.4
-- **Mod Loaders**: Fabric, NeoForge
+Mixins are duplicated per loader (rather than shared) — the mod is small (~100
+LoC across two mixins) so duplication is cheaper than the cross-project
+shared-library plumbing that would otherwise be required.
 
 ## Building
 
-**Note**: This project uses Kotlin DSL (`.gradle.kts`) for all build files, providing better Stonecutter support and IDE integration.
+Active version is set in `stonecutter.gradle.kts`. Build a single target:
 
-### Build all versions and loaders
-```bash
-./gradlew build
+```sh
+./gradlew :fabric:1.21.4:build
+./gradlew :neoforge:1.21.4:build
 ```
 
-### Build specific loader
-```bash
-./gradlew :fabric:build    # Fabric only
-./gradlew :neoforge:build  # NeoForge only
-```
+Output jars land in `<loader>/versions/<mc>/build/libs/`.
 
-### Switch active version
-Stonecutter automatically manages version switching. The current active version is `1.21.4` (configured in `settings.gradle`).
+## Tooling
 
-## Development
-
-### Project Structure
-- **common/**: Contains all the mixin code that's shared across loaders
-  - Uses Stonecutter comments `//? if >=version` for version-specific code
-- **fabric/**: Fabric-specific initialization and metadata
-- **neoforge/**: NeoForge-specific initialization and metadata
-
-### Version-Specific Code
-
-Stonecutter preprocessor comments are used for version-specific code:
-
-```java
-//? if >=1.21.4 {
-import net.minecraft.client.renderer.texture.SkinTextureDownloader;
-//?} else {
-/*import net.minecraft.client.renderer.texture.HttpTexture;*/
-//?}
-```
-
-### How It Works
-
-1. **Architectury** provides:
-   - Multi-loader abstraction (Fabric + NeoForge)
-   - Common/platform-specific code separation
-   - Unified build system
-
-2. **Stonecutter** provides:
-   - Multi-version support via conditional compilation
-   - Semantic version comparisons (`>=1.21`, `<1.20.5`)
-   - Fast version switching without remapping
-
-## Technical Details
-
-### Mixins
-- `MixinDownloadingTexture`: Cancels alpha channel stripping in skin textures
-- `MixinPlayerRenderer`: Enables translucent rendering for player hands
-
-### Dependencies
-- Java 21
-- Architectury Loom 1.7-SNAPSHOT
-- Architectury Plugin 3.4-SNAPSHOT
-- Stonecutter 0.7.10
+- Gradle 9.5
+- Java 21 (1.21.x) / Java 25 (26.1+)
+- [dev.architectury.loom](https://github.com/architectury/architectury-loom) 1.14.473
+- Stonecutter 0.7.x
 
 ## License
 
 GPL-3.0
-
-## Author
-
-mja00

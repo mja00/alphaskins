@@ -1,74 +1,59 @@
-architectury {
-    platformSetupLoomIde()
-    fabric()
+plugins {
+    java
+    id("dev.architectury.loom")
+}
+
+val minecraftVersion: String = stonecutter.current.version
+val branchRoot = projectDir.resolve("../..")
+
+version = "${mod.version}+$minecraftVersion-fabric"
+base.archivesName.set("${mod.id}-fabric")
+
+repositories {
+    mavenCentral()
+    maven("https://maven.fabricmc.net/")
+    maven("https://maven.architectury.dev/")
+}
+
+val javaVersion = if (stonecutter.eval(minecraftVersion, ">=26.1")) JavaVersion.VERSION_25
+    else if (stonecutter.eval(minecraftVersion, ">=1.20.5")) JavaVersion.VERSION_21
+    else JavaVersion.VERSION_17
+
+java {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion.toInt()))
+    withSourcesJar()
+}
+
+// Source lives in fabric/src/main/, not fabric/versions/<v>/src/.
+sourceSets["main"].apply {
+    java.setSrcDirs(listOf(branchRoot.resolve("src/main/java")))
+    resources.setSrcDirs(listOf(branchRoot.resolve("src/main/resources")))
 }
 
 loom {
-    accessWidenerPath.set(project(":common").file("src/main/resources/alphaskins.accesswidener"))
-}
-
-val common: Configuration by configurations.creating
-val shadowCommon: Configuration by configurations.creating
-val developmentFabric: Configuration = configurations.getByName("developmentFabric")
-
-configurations {
-    compileClasspath.get().extendsFrom(common)
-    runtimeClasspath.get().extendsFrom(common)
-    developmentFabric.extendsFrom(common)
+    silentMojangMappingsLicense()
+    accessWidenerPath.set(branchRoot.resolve("src/main/resources/alphaskins.accesswidener"))
 }
 
 dependencies {
-    modImplementation("net.fabricmc:fabric-loader:0.16.9")
-    modApi("net.fabricmc.fabric-api:fabric-api:0.110.0+1.21.4")
-
-    common(project(":common", "namedElements")) { isTransitive = false }
-    shadowCommon(project(":common", "transformProductionFabric")) { isTransitive = false }
+    minecraft("com.mojang:minecraft:$minecraftVersion")
+    mappings(loom.officialMojangMappings())
+    modImplementation("net.fabricmc:fabric-loader:${mod.dep("fabric_loader")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${mod.dep("fabric_api")}")
 }
 
 tasks.processResources {
-    inputs.property("version", project.version)
-    inputs.property("minecraft_version", stonecutter.current.version)
-    inputs.property("mod_id", rootProject.extra["mod_id"]!!)
-    inputs.property("mod_name", rootProject.extra["mod_name"]!!)
-    inputs.property("mod_description", rootProject.extra["mod_description"]!!)
-    inputs.property("mod_version", rootProject.extra["mod_version"]!!)
-    inputs.property("mod_authors", rootProject.extra["mod_authors"]!!)
-    inputs.property("mod_license", rootProject.extra["mod_license"]!!)
-
-    filesMatching("fabric.mod.json") {
-        expand(
-            "version" to project.version,
-            "minecraft_version" to stonecutter.current.version,
-            "mod_id" to rootProject.extra["mod_id"]!!,
-            "mod_name" to rootProject.extra["mod_name"]!!,
-            "mod_description" to rootProject.extra["mod_description"]!!,
-            "mod_version" to rootProject.extra["mod_version"]!!,
-            "mod_authors" to rootProject.extra["mod_authors"]!!,
-            "mod_license" to rootProject.extra["mod_license"]!!
-        )
-    }
-}
-
-tasks.shadowJar {
-    exclude("architectury.common.json")
-    configurations = listOf(shadowCommon)
-    archiveClassifier.set("dev-shadow")
-}
-
-tasks.remapJar {
-    injectAccessWidener.set(true)
-    inputFile.set(tasks.shadowJar.get().archiveFile)
-    dependsOn(tasks.shadowJar)
-}
-
-tasks.sourcesJar {
-    val commonSources = project(":common").tasks.getByName<Jar>("sourcesJar")
-    dependsOn(commonSources)
-    from(commonSources.archiveFile.map { zipTree(it) })
-}
-
-components.java {
-    withVariantsFromConfiguration(configurations["shadowRuntimeElements"]) {
-        skip()
-    }
+    val tokens = mapOf(
+        "mod_id" to mod.id,
+        "mod_name" to mod.name,
+        "mod_version" to mod.version,
+        "mod_description" to mod.description,
+        "mod_authors" to mod.author,
+        "mod_license" to mod.license,
+        "minecraft_version" to minecraftVersion,
+    )
+    for ((k, v) in tokens) inputs.property(k, v)
+    filesMatching("fabric.mod.json") { expand(tokens) }
 }
