@@ -6,8 +6,7 @@
   "mixins": [
   ],
   "client": [
-    "MixinDownloadingTexture",
-    "MixinPlayerRenderer"
+    "MixinDownloadingTexture"
   ],
   "injectors": {
     "defaultRequire": 1
