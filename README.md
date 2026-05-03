@@ -45,7 +45,11 @@ Output jars land in `<loader>/versions/<mc>/build/libs/`.
 
 - Gradle 9.5
 - Java 21 (1.21.x) / Java 25 (26.1+)
-- [dev.architectury.loom](https://github.com/architectury/architectury-loom) 1.14.473
+- Loom plugin per (loader, mc) variant:
+  - 1.21.x: [dev.architectury.loom](https://github.com/architectury/architectury-loom) 1.14.473
+  - 26.1+ NeoForge: dev.architectury.loom-no-remap 1.14.473
+  - 26.1+ Fabric: net.fabricmc.fabric-loom-no-remap 1.14.0-alpha.31 (FabricMC's
+    own no-mappings flow for unobfuscated MC)
 - Stonecutter 0.7.x
 
 ## License
