@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         loader: [fabric, neoforge]
-        mc: ['1.21.4', '1.21.8', '1.21.11', '26.1.2']
+        mc: ['1.21.4', '1.21.8', '1.21.11', '26.1.2', '26.2']
         include:
           - mc: '1.21.4'
             java: '21'
@@ -31,6 +31,8 @@ jobs:
           - mc: '1.21.11'
             java: '21'
           - mc: '26.1.2'
+            java: '25'
+          - mc: '26.2'
             java: '25'
     steps:
       - name: Checkout

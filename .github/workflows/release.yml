@@ -8,6 +8,10 @@ on:
       tag:
         description: Existing tag to release (e.g. v5.0.0)
         required: true
+      force_all:
+        description: Publish every (loader, mc) combo, ignoring change detection
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -18,6 +22,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Decide which (loader, mc) combos to publish: only those whose functional
+  # inputs changed since the previous tag. A new release always bumps mod.version,
+  # so that line is deliberately ignored — otherwise every combo would look changed
+  # and we'd republish identical mods to Modrinth/CurseForge.
+  detect:
+    name: detect changed versions
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.compute.outputs.matrix }}
+      any: ${{ steps.compute.outputs.any }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0 # need full history + tags to diff against the previous tag
+
+      - name: Compute publish matrix
+        id: compute
+        shell: bash
+        env:
+          FORCE_ALL: ${{ inputs.force_all }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: .github/scripts/detect-publish-matrix.sh
+
   build:
     name: build ${{ matrix.loader }} ${{ matrix.mc }}
     runs-on: ubuntu-latest
@@ -25,7 +54,7 @@ jobs:
       fail-fast: false
       matrix:
         loader: [fabric, neoforge]
-        mc: ['1.21.4', '1.21.8', '1.21.11', '26.1.2']
+        mc: ['1.21.4', '1.21.8', '1.21.11', '26.1.2', '26.2']
         include:
           - mc: '1.21.4'
             java: '21'
@@ -34,6 +63,8 @@ jobs:
           - mc: '1.21.11'
             java: '21'
           - mc: '26.1.2'
+            java: '25'
+          - mc: '26.2'
             java: '25'
     steps:
       - name: Checkout
@@ -89,15 +120,16 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
 
+  # Only combos flagged by `detect` reach here, so unchanged versions are never
+  # republished. Skipped entirely when nothing changed.
   publish:
     name: publish ${{ matrix.loader }} ${{ matrix.mc }}
-    needs: build
+    needs: [build, detect]
+    if: needs.detect.outputs.any == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        loader: [fabric, neoforge]
-        mc: ['1.21.4', '1.21.8', '1.21.11', '26.1.2']
+      matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
     steps:
       - name: Download jar
         uses: actions/download-artifact@v8
